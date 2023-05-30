@@ -11,7 +11,7 @@ run: build
 	@./$(EXEC).out
 
 build: $(EXEC).c
-	@$(CCOMP) $^ $(DEFAULTFLAGS) -O4 -o $(EXEC).out
+	@$(CCOMP) $^ $(DEFAULTFLAGS) -O3 -o $(EXEC).out
 
 asan: $(EXEC).c
 	@$(CCOMP) $^ $(DEFAULTFLAGS) $(DEBUGFLAGS) -g -fsanitize=address -o $(EXEC).out

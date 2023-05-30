@@ -7,10 +7,13 @@
 #include <unistd.h>
 #include <sys/param.h>
 #include <errno.h>
+#include <stdbool.h>
 
 // default buffer sizes
 #define SUBS_BUFSIZE 8
 #define CWD_BUFSIZE 64
+
+#define HOST_NAME_MAX 64
 
 // error strings
 #define MALLOC_ERR "Error while allocating memory"
@@ -21,14 +24,12 @@
 #define DUP_OUT_ERR "Dup error while redirecting output in a child process"
 #define DUP_IN_ERR "Dup error while redirecting input in a child process"
 #define SPRINTF_ERR "Error while creating a message"
-
-// message for
 #define OTHERSTATUS_MSG "A child process terminated with an unknown status\n"
 
 // prompt colours
-#define BOLDGREEN "\033[1m\033[32m"
-#define BOLDBLUE "\033[1m\033[34m"
-#define BOLDRED "\033[1m\033[31m"
+#define BOLD_GREEN "\033[1m\033[32m"
+#define BOLD_BLUE "\033[1m\033[34m"
+#define BOLD_RED "\033[1m\033[31m"
 #define RESET "\033[0m"
 
 // function declarations
@@ -42,6 +43,8 @@ int get_arguments(char *command, char ***arguments, char **input_redirect_path, 
 int parse_line(char *command, char ****parsed_line, int *command_no, char **input_redirect_path, char **output_redirect_path);
 int exec(char ***command, int command_no, char *input_redirect_path, char *output_redirect_path);
 int my_system(char *command);
+
+//TODO add `exit` builtin
 
 int main()
 {
@@ -106,6 +109,18 @@ int check_spaces(char *string, const char end)
 	return 1;
 }
 
+bool check_spaces2(char *string, const char end)
+{
+	for (int i = 0; string[i] != end && string[i] != '\0'; i++)
+	{
+		if (string[i] != ' ')
+			return false;
+	}
+
+	return true;
+}
+
+
 // prints prompt and reads (and returns) user input
 char *get_prompt(int last_exit_status)
 {
@@ -142,9 +157,9 @@ char *get_prompt(int last_exit_status)
 		sys_error(MALLOC_ERR);
 	int sprintf_res;
 	if (last_exit_status == 0)
-		sprintf_res = sprintf(prompt, BOLDRED "µsh:" RESET BOLDGREEN "%s@%s" RESET ":" BOLDBLUE "%s" RESET "$ ", getenv("USER"), hostname, cwd);
+		sprintf_res = sprintf(prompt, BOLD_RED "µsh:" RESET BOLD_GREEN "%s@%s" RESET ":" BOLD_BLUE "%s" RESET "$ ", getenv("USER"), hostname, cwd);
 	else
-		sprintf_res = sprintf(prompt, BOLDRED "µsh:" RESET BOLDGREEN "%s@%s" RESET ":" BOLDBLUE "%s" BOLDRED " %d " RESET "$ ", getenv("USER"), hostname, cwd, last_exit_status);
+		sprintf_res = sprintf(prompt, BOLD_RED "µsh:" RESET BOLD_GREEN "%s@%s" RESET ":" BOLD_BLUE "%s" BOLD_RED " %d " RESET "$ ", getenv("USER"), hostname, cwd, last_exit_status);
 	if (sprintf_res < 0)
 	{
 		fprintf(stderr, "Error formatting the prompt\n");
